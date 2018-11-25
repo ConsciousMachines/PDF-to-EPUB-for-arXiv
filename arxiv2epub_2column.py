@@ -6,8 +6,8 @@ import zipfile
 import os
 
 
-out_dir = 'C:\\Users\\yourname\\Desktop\\'
-pdf = 'C:\\Users\\yourname\\Desktop\\somefile.pdf'
+out_dir = 'C:\\Users\\user\\Desktop\\'
+pdf = 'C:\\Users\\user\\Desktop\\somefile.pdf'
 
 screen_h=1872
 screen_w=1404
