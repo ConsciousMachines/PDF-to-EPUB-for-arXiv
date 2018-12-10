@@ -68,23 +68,26 @@ class general_pdf():
         
 
     def general_crop(self, tpage, step = 5, leniance = 10):
-        side_crop_left = 0
-        side_crop_right = tpage.shape[1]-1
-        top_crop = 0 
-        bot_crop = tpage.shape[0]-1 
-        while np.mean(tpage[:,side_crop_left]) == 0:
-            side_crop_left += step
-        while np.mean(tpage[:,side_crop_right]) == 0:
-            side_crop_right -= step 
-        while np.mean(tpage[top_crop,:]) == 0:
-            top_crop += step 
-        while np.mean(tpage[bot_crop,:]) == 0:
-            bot_crop -= step 
-        side_crop_left = max(0,side_crop_left - leniance)
-        side_crop_right = min(tpage.shape[1]-1, side_crop_right + leniance)
-        top_crop = max(0, top_crop - leniance)
-        bot_crop = min(tpage.shape[0]-1, bot_crop + leniance)
-        return tpage[top_crop:bot_crop, side_crop_left:side_crop_right]
+        try:
+            side_crop_left = 0
+            side_crop_right = tpage.shape[1]-1
+            top_crop = 0
+            bot_crop = tpage.shape[0]-1
+            while np.mean(tpage[:,side_crop_left]) == 0:
+                side_crop_left += step
+            while np.mean(tpage[:,side_crop_right]) == 0:
+                side_crop_right -= step
+            while np.mean(tpage[top_crop,:]) == 0:
+                top_crop += step
+            while np.mean(tpage[bot_crop,:]) == 0:
+                bot_crop -= step
+            side_crop_left = max(0,side_crop_left - leniance)
+            side_crop_right = min(tpage.shape[1]-1, side_crop_right + leniance)
+            top_crop = max(0, top_crop - leniance)
+            bot_crop = min(tpage.shape[0]-1, bot_crop + leniance)
+            return tpage[top_crop:bot_crop, side_crop_left:side_crop_right]
+        except: # this is the case for blank pages
+            return tpage
 
 
     def make_general_epub(self, images, output_dir, title=None, author=None):
