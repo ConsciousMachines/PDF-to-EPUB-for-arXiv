@@ -4,12 +4,22 @@ Tired of reading arXiv papers on the computer? Wishing there existed a way to co
 
 TL;DR: for ANY pdf regardless of format, use easy_convert.py: call the convert(pdf_path, output_directory) and you're done.
 
-Just organize all the pdf files you want to read into 2 folders, one with single-column documents (like textbooks) and one for two-column documents (like most arXiv papers). Then supply the names of the pdf directory, and the desired output directory to the respective script and you got an EPUB that you can read on the go without straining your eyes for hours. Also, provide your E-reader resolution for better image scale ratios (mine was 1.333)
+*Installation*
+
+- follow instructions [here](https://github.com/Belval/pdf2image) to install pdf2image and Poppler
+- navigate to your installation directory and run:
+$ pip install -r requirements.txt
+
+*Directions*
+- set "pdf_dir" in the python script to the folder with the PDFs you want to convert
+- set "out_dir" to the directory where you want the output
+- run!
+
 
 ![alt text](https://github.com/ConsciousMachines/PDF-to-EPUB-for-arXiv/blob/master/example.jpg)
 
 How it's done: 
-this method takes the PDF and converts it to an image using the pdf2image wrapper (requires to install Popper ((Windows binaries are available online))), and then the images to an EPUB file. This top-down approach takes care of all the problems of decrypting PDF files and reconverting images, fonts, etc. 
+this method takes the PDF and converts it to an image using the pdf2image wrapper (requires to install Popper ((Windows binaries are available online))), and then the images to an EPUB file. This top-down approach takes care of all the problems of decrypting PDF files and reconverting images, fonts, etc. while maintaining all the desired formatting eyecandy embedded in PDFs. 
 
 
 
