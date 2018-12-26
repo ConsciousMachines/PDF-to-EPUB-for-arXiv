@@ -7,67 +7,29 @@ import os
 from tqdm import tqdm
 
 out_dir = 'C:\\Users\\name\\Desktop\\test\\out\\'
-pdf_dir = 'C:\\Users\\name\\Desktop\\test\\some_book.pdf'
+pdf_dir = 'C:\\Users\\name\\Desktop\\test\\'
+
+pdfs = [pdf_dir + i for i in os.listdir(pdf_dir) if i[-4:] == '.pdf']
 
 
-def convert(pdf_dir, out_dir):
-    an_instance = general_pdf(pdf_dir, out_dir)
-    del an_instance 
-    print("EPUB ready at " + out_dir)
-
-class general_pdf():
-    def __init__(self, pdf_dir, out_dir):
-        self.pdf_dir = pdf_dir 
-        self.out_dir = out_dir 
-        assert os.path.exists(pdf_dir)
-        assert os.path.exists(out_dir)
-        self.pdf_title = pdf_dir.split('\\')[-1].split('.pdf')[0]
-        self.create_temp_dir()
-        self.data = p2i.convert_from_path(self.pdf_dir, fmt='png', thread_count=os.cpu_count())
-        self.slice_pages()
-        self.save_images()
-        self.convert_to_epub()
 
 
-    def convert_to_epub(self):
-        images = [self.temp_dir_name + i for i in os.listdir(self.temp_dir_name)]
-        self.make_general_epub(images, title = self.pdf_title, output_dir = self.out_dir)
-        shutil.rmtree(self.temp_dir_name)
+class tools():
 
+    def convert(pdf_dir, out_dir):
+        an_instance = general_pdf(pdf_dir, out_dir)
+        del an_instance
+        print("EPUB ready at " + out_dir)
 
-    def save_images(self):
-        digits = len(str(len(self.all_slices)))
-        file_names = [str(i).rjust(digits, '0') + '.jpg' for i in range(len(self.all_slices))]
-        for index, slice in enumerate(self.all_slices):
-            im.fromarray(255-slice).save(self.temp_dir_name + file_names[index])
-        
-
-    def create_temp_dir(self):
-        if self.out_dir[-1] != '\\':
-            self.out_dir += '\\'
-        self.temp_dir_name = self.out_dir + 'temp'
-        while os.path.exists(self.temp_dir_name):
-            self.temp_dir_name += '0'
-        self.temp_dir_name += '\\'
-        os.mkdir(self.temp_dir_name)
-        
-
-    def slice_pages(self):
-        self.all_slices = []    
-        for i in tqdm(range(len(self.data))):
-            tpage = 255 - np.asarray(self.data[i])[:,:,0]
-            tpage = self.general_crop(tpage)
-            self.all_slices += self.general_split(tpage)
-            
-
-    def general_split(self, tpage, leniance = 20):
+    
+    def general_split(tpage, leniance = 20):
         v_split = tpage.shape[0]//2
         one_slice = np.transpose(tpage[:v_split + leniance,:])[::-1,:]
         two_slice = np.transpose(tpage[v_split-leniance:,:])[::-1,:]
         return [one_slice, two_slice]
-        
 
-    def general_crop(self, tpage, step = 5, leniance = 10):
+
+    def general_crop(tpage, step = 5, leniance = 10):
         try:
             side_crop_left = 0
             side_crop_right = tpage.shape[1]-1
@@ -90,7 +52,7 @@ class general_pdf():
             return tpage
 
 
-    def make_general_epub(self, images, output_dir, title=None, author=None):
+    def make_general_epub(images, output_dir, title=None, author=None):
         if True:
 
             container_xml = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -207,8 +169,55 @@ class general_pdf():
         manifest += content3
         epub.writestr("OEBPS/content.opf", manifest)
         epub.close()
+ 
+    
+class general_pdf():
+    def __init__(self, pdf_dir, out_dir):
+        self.pdf_dir = pdf_dir
+        self.out_dir = out_dir
+        assert os.path.exists(pdf_dir)
+        assert os.path.exists(out_dir)
+        self.pdf_title = pdf_dir.split('\\')[-1].split('.pdf')[0]
+        self.create_temp_dir()
+        self.data = p2i.convert_from_path(self.pdf_dir, fmt='png', thread_count=os.cpu_count())
+        self.slice_pages()
+        self.save_images()
+        self.convert_to_epub()
 
 
-convert(pdf_dir, out_dir)
+    def convert_to_epub(self):
+        images = [self.temp_dir_name + i for i in os.listdir(self.temp_dir_name)]
+        tools.make_general_epub(images, title = self.pdf_title, output_dir = self.out_dir)
+        shutil.rmtree(self.temp_dir_name)
 
 
+    def save_images(self):
+        digits = len(str(len(self.all_slices)))
+        file_names = [str(i).rjust(digits, '0') + '.jpg' for i in range(len(self.all_slices))]
+        for index, slice in enumerate(self.all_slices):
+            im.fromarray(255-slice).save(self.temp_dir_name + file_names[index])
+
+
+    def create_temp_dir(self):
+        if self.out_dir[-1] != '\\':
+            self.out_dir += '\\'
+        self.temp_dir_name = self.out_dir + 'temp'
+        while os.path.exists(self.temp_dir_name):
+            self.temp_dir_name += '0'
+        self.temp_dir_name += '\\'
+        os.mkdir(self.temp_dir_name)
+
+
+    def slice_pages(self):
+        self.all_slices = []
+        for i in tqdm(range(len(self.data))):
+            tpage = 255 - np.asarray(self.data[i])[:,:,0]
+            tpage = tools.general_crop(tpage)
+            self.all_slices += tools.general_split(tpage)
+
+
+
+
+for i in pdfs:
+    tools.convert(i, out_dir)
+    
