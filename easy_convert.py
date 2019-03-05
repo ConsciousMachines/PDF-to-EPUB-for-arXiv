@@ -211,7 +211,7 @@ class general_pdf():
     def slice_pages(self):
         self.all_slices = []
         for i in tqdm(range(len(self.data))):
-            tpage = 255 - np.asarray(self.data[i])[:,:,0]
+            tpage = (np.sum(255 - np.asarray(self.data[i]), axis=2)//3).astype(np.uint8)
             tpage = tools.general_crop(tpage)
             self.all_slices += tools.general_split(tpage)
 
