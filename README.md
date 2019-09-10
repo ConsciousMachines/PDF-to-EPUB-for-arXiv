@@ -26,4 +26,4 @@ this method takes the PDF and converts it to an image using the pdf2image wrappe
 Tested with Kobo Aura One e-reader, and on Windows 10
 
 Known issues: 
-- epub doesn't open on Microsoft Edge explorer (still works on your E-reader though)
+- None
