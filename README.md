@@ -29,6 +29,5 @@ Tested with Kobo Aura One e-reader, and on Windows 10
 
 Known issues: 
 - None
-- for some reason Microsoft Edge renders the results differently from the e-reader, so don't bother using it for debugging
 
 special thanks to KCC (Kindle Comic Converter) which shows how to implement borderless epubs. 
