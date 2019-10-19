@@ -89,7 +89,7 @@ def make_numpy_arrays(the_data):
     the 3 color channels.   '''
     new_data = []
     for i in range(len(the_data)):
-        tpage = (np.sum(255 - np.asarray(data[i]), axis=2)//3).astype(np.uint8)
+        tpage = (np.sum(255 - np.asarray(the_data[i]), axis=2)//3).astype(np.uint8)
         new_data.append(tpage)
     return new_data
 
@@ -269,43 +269,6 @@ def convert_to_epub_NO_BORDER(temp_dir_name, one_pdf_dir, title, all_slices):
 
 
 
-''' TEST ZONE: FIND THE PARAMETERS '''
-
-'''
-pdf_dir = pdfs[0]
-pdf_title = pdf_dir.split('\\')[-1].split('.pdf')[0]
-pdf_title
-
-first_page = 0
-last_page = 100
-data = p2i.convert_from_path(pdf_dir, fmt='png', thread_count=os.cpu_count(),\
-    first_page=first_page, last_page = last_page)
-
-
-
-
-i = 41
-tpage = (np.sum(255 - np.asarray(data[i]), axis=2)//3).astype(np.uint8)
-#im.fromarray(tpage).show()
-tpage2 = tpage.copy()
-x_left = 20
-x_right = 350
-y_up = 150
-y_down = 150
-tpage2[y_up,:] = 255
-tpage2[:,x_left] = 255
-tpage2[-y_down,:] = 255
-tpage2[:,-x_right] = 255
-im.fromarray(tpage2).show()
-
-
-custom_crop_params = [x_left, x_right, y_up, y_down]
-'''
-
-'''================================== END EXPERIMENTATION ZONE
-==============================================================='''
-
-
 
 
 for one_pdf_dir in pdfs:
@@ -315,7 +278,8 @@ for one_pdf_dir in pdfs:
     print("Starting:\n" + one_pdf_dir)
     data = p2i.convert_from_path(one_pdf_dir, fmt='png', thread_count=os.cpu_count())#, last_page=20)
 
-    imgs = make_numpy_arrays(data)
+    data2 = [data[0]] + data[:] # copy first page to be the cover, then cropped
+    imgs = make_numpy_arrays(data2)
     #imgs = [custom_crop(i, custom_crop_params) for i in imgs] # custom crop
     all_slices = slice_pages(imgs)
 
