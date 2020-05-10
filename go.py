@@ -1,21 +1,14 @@
+# press CTRL + K + 0    to collapse all functions
 import pdf2image as p2i
 from PIL import Image as im
+from PIL import ImageEnhance
 import numpy as np
-import shutil
-import zipfile
-import os
-from tqdm import tqdm
-
-# TODO:
-# https://stackoverflow.com/questions/2431426/extract-toc-of-pdf
+import shutil, zipfile, os
 
 
-out_dir = 'C:\\Users\\pwnag\\Desktop\\'
-pdf_dir = 'C:\\Users\\pwnag\\Desktop\\'
-SERIOUSLY_PACKED = False
+work_dir = 'C:\\Users\\pwnag\\Desktop\\'
 
-pdfs = [pdf_dir + i for i in os.listdir(pdf_dir) if i[-4:] == '.pdf']
-
+create_dir = lambda dir : os.mkdir(dir) if not os.path.exists(dir) else print("folder exists!")
 
 def general_split(tpage, leniance = 20):
     v_split = tpage.shape[0]//2
@@ -24,30 +17,20 @@ def general_split(tpage, leniance = 20):
     return [one_slice, two_slice]
 
 
-def general_crop(tpage, step = 5, leniance = 5):
+def general_crop(tpage, leniance = 5, step = 5):
     try:
         side_crop_left = 0
         side_crop_right = tpage.shape[1]-1
         top_crop = 0
         bot_crop = tpage.shape[0]-1
-        if SERIOUSLY_PACKED:
-            while np.mean(tpage[:,side_crop_left]) <= 5: # for seriously cramped books
-                side_crop_left += step
-            while np.mean(tpage[:,side_crop_right]) <= 5:
-                side_crop_right -= step
-            while np.mean(tpage[top_crop,:]) <= 5:
-                top_crop += step
-            while np.mean(tpage[bot_crop,:]) <= 5:
-                bot_crop -= step
-        else: # this branch is untested, glitches redirect here
-            while np.mean(tpage[:,side_crop_left]) == 0: # <= 5: for seriously cramped books
-                side_crop_left += step
-            while np.mean(tpage[:,side_crop_right]) == 0: # <= 5:
-                side_crop_right -= step
-            while np.mean(tpage[top_crop,:]) == 0: # <= 5:
-                top_crop += step
-            while np.mean(tpage[bot_crop,:]) == 0: # <= 5:
-                bot_crop -= step
+        while np.mean(tpage[:,side_crop_left]) == 0: 
+            side_crop_left += step
+        while np.mean(tpage[:,side_crop_right]) == 0: 
+            side_crop_right -= step
+        while np.mean(tpage[top_crop,:]) == 0: 
+            top_crop += step
+        while np.mean(tpage[bot_crop,:]) == 0: 
+            bot_crop -= step
         side_crop_left = max(0,side_crop_left - leniance)
         side_crop_right = min(tpage.shape[1]-1, side_crop_right + leniance)
         top_crop = max(0, top_crop - leniance)
@@ -57,60 +40,7 @@ def general_crop(tpage, step = 5, leniance = 5):
         return tpage
 
 
-def save_images(slices_to_save, temp_dir_name):
-    '''
-    def save_images_old():
-        digits = len(str(len(all_slices)))
-        file_names = [str(i).rjust(digits, '0') + '.jpg' for i in range(len(all_slices))]
-        for index, slice in enumerate(all_slices):
-            im.fromarray(255-slice).save(temp_dir_name + file_names[index])
-    '''
-
-    '''saves the images to the temporary directory.'''
-    digits = len(str(len(slices_to_save)))
-    file_names = [str(i).rjust(digits, '0') + '.jpg' for i in range(len(slices_to_save))]
-    for index, slice in enumerate(slices_to_save):
-        im.fromarray(255-slice).save(temp_dir_name + file_names[index])
-
-
-def custom_crop(tpage, params):
-    '''
-    params in the format: X_LEFT, X_RIGHT, Y_UP, Y_DOWN
-    x_left = params[0]
-    x_right = params[1]
-    y_up = params[2]
-    y_down = params[3]
-    '''
-    return tpage[params[2]:-params[3]:,params[0]:-params[1]]
-
-
-def make_numpy_arrays(the_data):
-    ''' Turns the rendered image into a numpy array, which will be an average over
-    the 3 color channels.   '''
-    new_data = []
-    for i in range(len(the_data)):
-        tpage = (np.sum(255 - np.asarray(the_data[i]), axis=2)//3).astype(np.uint8)
-        new_data.append(tpage)
-    return new_data
-
-
-def slice_pages(the_imgs):
-    '''performs the general crop and the general split.'''
-    all_slices = []
-    # dont preprocess cover page
-    all_slices.append(the_imgs[0])
-    # rest of the pages
-    for i in tqdm(range(1,len(the_imgs))):
-        tpage = the_imgs[i]
-        tpage = general_crop(tpage)
-        all_slices += general_split(tpage)
-    return all_slices
-
-
-def convert_to_epub_NO_BORDER(temp_dir_name, one_pdf_dir, title, all_slices):
-
-    # ALL NEW KEPUB
-
+def convert_to_epub(temp_dir, output_dir, title, img_shapes):
     if True:
         container_xml = '''<?xml version="1.0"?>
         <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
@@ -212,28 +142,19 @@ def convert_to_epub_NO_BORDER(temp_dir_name, one_pdf_dir, title, all_slices):
         </html>
         '''
 
-
-
-    # Initialize
-
-    WIDTH = 1250
-    HEIGHT = 1807
-
-    output_dir = one_pdf_dir[:-4]
-    epub = zipfile.ZipFile(output_dir + '.kepub.epub', 'w')
+     
+    epub = zipfile.ZipFile(os.path.join(output_dir, title) + '.kepub.epub', 'w')
     epub.writestr("mimetype", "application/epub+zip")
     epub.writestr("META-INF/container.xml", container_xml)
     epub.writestr("OEBPS/nav.xhtml", nav_xhtml.format(title))
     epub.writestr("OEBPS/toc.ncx", toc_ncx)
     epub.writestr("OEBPS/Text/style/css", style_css)
 
-
-
     manifest, spine = '', ''
 
-    images = [os.path.join(temp_dir_name, i) for i in os.listdir(temp_dir_name)]
+    images = [os.path.join(temp_dir, i) for i in os.listdir(temp_dir)]
 
-    names = [format(i, '04d') + '-kcc' for i in range(len(images))]
+    names = [format(i, '04d') for i in range(len(images))]
 
     # write cover (just duplicate images[0])
     im_content = open(images[0], 'rb').read()
@@ -248,9 +169,8 @@ def convert_to_epub_NO_BORDER(temp_dir_name, one_pdf_dir, title, all_slices):
 
         im_content = open(images[index], 'rb').read()
 
-        image_width = all_slices[index].shape[1] # done here before the index is incremented.
-        image_height = all_slices[index].shape[0]
-        #image_height = 1200#int(image_height*1.1)
+        image_width = img_shapes[index][0]
+        image_height = img_shapes[index][1]
 
         index += 1
         epub.writestr("OEBPS/Images/" + i + '.jpg', im_content)
@@ -260,37 +180,93 @@ def convert_to_epub_NO_BORDER(temp_dir_name, one_pdf_dir, title, all_slices):
         epub.writestr("OEBPS/Text/{0}.xhtml".format(i), xhtml_content)
 
 
-
     # write content
     content_opf_final = content_opf_upper.format(title) + manifest + content_opf_middle + spine + content_opf_lower
     epub.writestr("OEBPS/content.opf", content_opf_final)
     epub.close()
 
 
+''' TEST ZONE '''
+LENIANCE = 5 # 5 normal, 20 for a smol border (for converting light novels)
+pdfs = [work_dir + i for i in os.listdir(work_dir) if i[-4:] == '.pdf']
+
+one_pdf = pdfs[0]    
+pdf_title = one_pdf.split('\\')[-1].split('.')[0]
+print("Starting:\n" + pdf_title)
+
+
+# make temporary directory
+temp_dir = os.path.join(work_dir, 'temp')
+create_dir(temp_dir)
+
+
+'''
+convert_from_path(pdf_path, dpi=200, output_folder=None, 
+first_page=None, last_page=None, fmt='ppm', jpegopt=None, 
+thread_count=1, userpw=None, use_cropbox=False, strict=False, 
+transparent=False, single_file=False, output_file=str(uuid.uuid4()), 
+poppler_path=None, grayscale=False, size=None, paths_only=False)
+'''
+data = p2i.convert_from_path(one_pdf, fmt='png', thread_count=os.cpu_count())#, last_page=20)
+
+
+# turn rendered image into Black & White numpy array 
+imgs = [(np.sum(255 - np.asarray(i), axis=2)//3).astype(np.uint8) for i in data]
+for i in range(len(imgs)): imgs[i][np.where(imgs[i]==1)] = 0 # correct white pixels 
+front_cover = imgs[0] # copy the original cover
+
+
+# custom crop 
+if False:
+
+    # P R E - C R O P
+    # dark mode cropping master page - R U N  O N C E 
+    test_page_ = imgs[5].copy() 
+    for i in range(5, len(imgs)-5):
+        test_page_ = np.maximum(test_page_, imgs[i])
+
+    # C R O P   D I M S   E X P E R I M E N T A T I O N 
+    x_left = 120
+    x_right = 10
+    y_up = 128
+    y_down = 200
+    total_page = test_page_.copy()
+    total_page[y_up,:] = 255
+    total_page[:,x_left] = 255
+    total_page[-y_down,:] = 255
+    total_page[:,-x_right] = 255 
+    im.fromarray(total_page).show()
+
+    imgs = [i[y_up:-y_down:,x_left:-x_right] for i in imgs[1:]] # custom crop
+
+
+# perform general crop and split
+all_slices = [front_cover] 
+for i in imgs: all_slices += general_split(general_crop(i,LENIANCE)) 
+img_shapes = [[i.shape[1], i.shape[0]] for i in all_slices] # width, height
+
+
+# save imgs to temp dir
+file_names = [str(i).rjust(4, '0') + '.jpg' for i in range(len(all_slices))]
+for i, slice in enumerate(all_slices):
+    im.fromarray(255-slice).save(os.path.join(temp_dir, file_names[i]))
+
+
+del all_slices, imgs, data     
 
 
 
+# c o n t r a s t 
+'''
+create_dir(temp_dir + '2')
+images = [os.path.join(temp_dir, i) for i in os.listdir(temp_dir)]
+file_names = [str(i).rjust(4, '0') + '.jpg' for i in range(len(images))]
+for i, imag in enumerate(images):
+    enhancer = ImageEnhance.Contrast(im.open(imag))
+    enhancer.enhance(4.).save(os.path.join(temp_dir+'2', file_names[i]))
+convert_to_epub(temp_dir + '2', work_dir, pdf_title, img_shapes)
+'''
 
-for one_pdf_dir in pdfs:
 
-    pdf_title = one_pdf_dir.split('\\')[-1].split('.')[0]
-    pdf_title
-    print("Starting:\n" + one_pdf_dir)
-    data = p2i.convert_from_path(one_pdf_dir, fmt='png', thread_count=os.cpu_count())#, last_page=20)
-
-    data2 = [data[0]] + data[:] # copy first page to be the cover, then cropped
-    imgs = make_numpy_arrays(data2)
-    #imgs = [custom_crop(i, custom_crop_params) for i in imgs] # custom crop
-    all_slices = slice_pages(imgs)
-
-    # make temporary directory
-    temp_dir_name = out_dir + 'temp'
-    temp_dir_name += '\\'
-    os.mkdir(temp_dir_name)
-    # do the rest
-    save_images(all_slices, temp_dir_name)
-    #convert_to_epub(temp_dir_name, out_dir, pdf_title)
-
-    convert_to_epub_NO_BORDER(temp_dir_name, one_pdf_dir, pdf_title, all_slices)
-
-    shutil.rmtree(temp_dir_name)
+convert_to_epub(temp_dir, work_dir, pdf_title, img_shapes)
+shutil.rmtree(temp_dir)
