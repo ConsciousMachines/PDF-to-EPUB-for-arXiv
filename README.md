@@ -18,7 +18,7 @@ Do you wish your PDFs appeared properly on your e-reader? Well, today is your lu
 ![alt text](https://github.com/ConsciousMachines/PDF-to-EPUB-for-arXiv/blob/master/example.jpg)
 
 
-*BuT hOw DoEs It WoRk ? ? ? *
+*BuT hOw DoEs It WoRk?*
 ==========
 We render the PDF's pages as images. then save it as a comic book. 
 
