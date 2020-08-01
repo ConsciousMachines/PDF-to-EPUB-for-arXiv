@@ -1,16 +1,13 @@
 # PDF-to-EPUB
 
-Have you always wished that you could read PDFs just like they appear on your computer screen, but on your e-reader? Well today is the day that it finally happens. All you need is a KOBO e-reader. 
+Have you always wished that you could read PDFs just like they appear on your computer screen, but on your e-reader? Well, if you have a KOBO e-reader, today is your lucky day!
 
-Update: New borderless version available, for extra dense PDFs
 
-TL;DR: for ANY pdf, use easy_convert.py: call the convert(pdf_path, output_directory) and you're done.
 
 *Installation*
 
 - follow instructions [here](https://github.com/Belval/pdf2image) to install pdf2image and Poppler
-- navigate to your installation directory and run:
-$ pip install -r requirements.txt
+
 
 *Directions*
 - set "pdf_dir" in the python script to the folder with the PDFs you want to convert
@@ -28,6 +25,6 @@ this method takes the PDF and converts it to an image using the pdf2image wrappe
 Tested with Kobo Aura One e-reader, and on Windows 10
 
 Known issues: 
-- None
+- None. This is an ideal program. 
 
 special thanks to KCC (Kindle Comic Converter) which shows how to implement borderless epubs. 
