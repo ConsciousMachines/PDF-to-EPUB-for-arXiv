@@ -142,7 +142,6 @@ def convert_to_epub(temp_dir, output_dir, title, img_shapes):
         </html>
         '''
 
-     
     epub = zipfile.ZipFile(os.path.join(output_dir, title) + '.kepub.epub', 'w')
     epub.writestr("mimetype", "application/epub+zip")
     epub.writestr("META-INF/container.xml", container_xml)
@@ -160,7 +159,6 @@ def convert_to_epub(temp_dir, output_dir, title, img_shapes):
     im_content = open(images[0], 'rb').read()
     epub.writestr("OEBPS/Images/" + 'cover.jpg', im_content)
 
-
     # write the rest of the images
     index = 0
     for i in names:
@@ -175,10 +173,8 @@ def convert_to_epub(temp_dir, output_dir, title, img_shapes):
         index += 1
         epub.writestr("OEBPS/Images/" + i + '.jpg', im_content)
 
-
         xhtml_content = xhtml_template.format(i, image_width, image_height)
         epub.writestr("OEBPS/Text/{0}.xhtml".format(i), xhtml_content)
-
 
     # write content
     content_opf_final = content_opf_upper.format(title) + manifest + content_opf_middle + spine + content_opf_lower
@@ -195,11 +191,6 @@ pdf_title = one_pdf.split('\\')[-1].split('.')[0]
 print("Starting:\n" + pdf_title)
 
 
-# make temporary directory
-temp_dir = os.path.join(work_dir, 'temp')
-create_dir(temp_dir)
-
-
 '''
 convert_from_path(pdf_path, dpi=200, output_folder=None, 
 first_page=None, last_page=None, fmt='ppm', jpegopt=None, 
@@ -207,28 +198,42 @@ thread_count=1, userpw=None, use_cropbox=False, strict=False,
 transparent=False, single_file=False, output_file=str(uuid.uuid4()), 
 poppler_path=None, grayscale=False, size=None, paths_only=False)
 '''
-data = p2i.convert_from_path(one_pdf, fmt='png', thread_count=os.cpu_count())#, last_page=20)
+data = p2i.convert_from_path(one_pdf, fmt='png', thread_count=os.cpu_count(), first_page = 69, last_page=96)
 
+
+
+# make temporary directory
+temp_dir = os.path.join(work_dir, 'temp')
+create_dir(temp_dir)
 
 # turn rendered image into Black & White numpy array 
 imgs = [(np.sum(255 - np.asarray(i), axis=2)//3).astype(np.uint8) for i in data]
-for i in range(len(imgs)): imgs[i][np.where(imgs[i]==1)] = 0 # correct white pixels 
+for i in range(len(imgs)): 
+    imgs[i][np.where(imgs[i]==1)] = 0 # correct white pixels 
 front_cover = imgs[0] # copy the original cover
+
+# correct double covers 
+fc_height, fc_width = front_cover.shape
+if fc_height / fc_width < 1:
+    front_cover = front_cover[:,fc_width//2:]
+
+
 
 
 # custom crop 
 if False:
-
+        
     # P R E - C R O P
     # dark mode cropping master page - R U N  O N C E 
-    test_page_ = imgs[5].copy() 
-    for i in range(5, len(imgs)-5):
-        test_page_ = np.maximum(test_page_, imgs[i])
+    BRUH = 50 # skip BRUH front / back pages 
+    test_page_ = imgs[BRUH].copy() 
+    for i in range(BRUH, len(imgs)-BRUH):
+        test_page_ = np.maximum(test_page_, imgs[i])    
 
     # C R O P   D I M S   E X P E R I M E N T A T I O N 
-    x_left = 120
-    x_right = 10
-    y_up = 128
+    x_left = 480
+    x_right = 220
+    y_up = 200
     y_down = 200
     total_page = test_page_.copy()
     total_page[y_up,:] = 255
@@ -240,9 +245,12 @@ if False:
     imgs = [i[y_up:-y_down:,x_left:-x_right] for i in imgs[1:]] # custom crop
 
 
+
+
 # perform general crop and split
 all_slices = [front_cover] 
-for i in imgs: all_slices += general_split(general_crop(i,LENIANCE)) 
+for i in imgs: 
+    all_slices += general_split(general_crop(i,LENIANCE)) 
 img_shapes = [[i.shape[1], i.shape[0]] for i in all_slices] # width, height
 
 
@@ -251,22 +259,20 @@ file_names = [str(i).rjust(4, '0') + '.jpg' for i in range(len(all_slices))]
 for i, slice in enumerate(all_slices):
     im.fromarray(255-slice).save(os.path.join(temp_dir, file_names[i]))
 
-
-del all_slices, imgs, data     
-
+#convert_to_epub(temp_dir, work_dir, pdf_title, img_shapes) # original without contrast
+del all_slices, imgs 
 
 
 # c o n t r a s t 
-'''
 create_dir(temp_dir + '2')
 images = [os.path.join(temp_dir, i) for i in os.listdir(temp_dir)]
 file_names = [str(i).rjust(4, '0') + '.jpg' for i in range(len(images))]
-for i, imag in enumerate(images):
+shutil.copyfile(images[0], os.path.join(temp_dir+'2', file_names[0])) # dont modify cover
+for i, imag in enumerate(images[1:],1):
     enhancer = ImageEnhance.Contrast(im.open(imag))
     enhancer.enhance(4.).save(os.path.join(temp_dir+'2', file_names[i]))
+
 convert_to_epub(temp_dir + '2', work_dir, pdf_title, img_shapes)
-'''
-
-
-convert_to_epub(temp_dir, work_dir, pdf_title, img_shapes)
 shutil.rmtree(temp_dir)
+shutil.rmtree(temp_dir + '2')
+
