@@ -1,6 +1,6 @@
 # PDF-to-EPUB
 
-Have you always wished PDFs appeared properly on your e-reader? Well, today is your lucky day!
+Do you wish your PDFs appeared properly on your e-reader? Well, today is your lucky day!
 
 
 
@@ -18,7 +18,7 @@ Have you always wished PDFs appeared properly on your e-reader? Well, today is y
 ![alt text](https://github.com/ConsciousMachines/PDF-to-EPUB-for-arXiv/blob/master/example.jpg)
 
 
-BuT hOw DoEs It WoRk ? ? ? 
+*BuT hOw DoEs It WoRk ? ? ? *
 ==========
 We render the PDF's pages as images. then save it as a comic book. 
 
@@ -27,10 +27,10 @@ We render the PDF's pages as images. then save it as a comic book.
 ==========
 - there is a "custom crop" block of code where you can manually crop out parts of the pages, like a header or footer. 
 
-Known issues: 
+*Known Issues*
 ==========
 - None. This is the perfect Python script. 
 
-special thanks 
+*Special Thanks*
 =
 to KCC (Kindle Comic Converter) which shows how to implement borderless epubs. 
