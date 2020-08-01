@@ -1,4 +1,4 @@
-# PDF-to-EPUB
+# PDF->EPUB
 
 Do you wish your PDFs appeared properly on your e-reader? Well, today is your lucky day!
 
