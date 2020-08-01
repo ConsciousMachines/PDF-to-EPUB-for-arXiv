@@ -29,7 +29,7 @@ We render the PDF's pages as images. then save it as a comic book.
 
 *Known Issues*
 ==========
-- None. This is the perfect Python script. 
+- None. This is a perfect Python script. 
 
 *Special Thanks*
 =
