@@ -198,7 +198,7 @@ thread_count=1, userpw=None, use_cropbox=False, strict=False,
 transparent=False, single_file=False, output_file=str(uuid.uuid4()), 
 poppler_path=None, grayscale=False, size=None, paths_only=False)
 '''
-data = p2i.convert_from_path(one_pdf, fmt='png', thread_count=os.cpu_count(), first_page = 69, last_page=96)
+data = p2i.convert_from_path(one_pdf, fmt='png', thread_count=os.cpu_count())#, first_page = 69, last_page=96)
 
 
 
