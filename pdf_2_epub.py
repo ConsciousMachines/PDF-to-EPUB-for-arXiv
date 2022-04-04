@@ -77,7 +77,7 @@ for one_pdf in pdfs:
     # c o n t r a s t   &   s a v e
     with zipfile.ZipFile(os.path.join(out_dir, f'{pdf_title}.cbz'), 'w') as zf:
         for i in range(1, len(all_slices)):
-            file_object = io.BytesIO()
+            file_object = io.BytesIO() # https://stackoverflow.com/questions/63439403/how-to-create-a-zip-file-in-memory-with-a-list-of-pil-image-objects
             e = ImageEnhance.Contrast(im.fromarray(255 - all_slices[i]))
             e.enhance(4.).save(file_object, "PNG")
             zf.writestr(f"{str(i).rjust(4, '0')}.png", file_object.getvalue())
