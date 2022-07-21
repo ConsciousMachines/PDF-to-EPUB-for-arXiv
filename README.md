@@ -13,6 +13,7 @@ follow instructions [here](https://github.com/Belval/pdf2image) to install pdf2i
 
 # Changelog
 ## July 21, 2022
+- added UI for easy cropping
 - removed numpy dependency for the cropping process (making it faster)
 - the process was getting killed for large books (>900 pages) and large dpi (>300) so even though the data[] array is "ready", there must be lazy evaluation going on somewhere otherwise it wouldn't run out of memory in the loop. deleting old data[] elements fixed the issue. 
 
