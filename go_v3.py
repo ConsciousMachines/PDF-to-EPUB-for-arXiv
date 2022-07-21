@@ -17,9 +17,9 @@ print(f"Starting:\n{pdf_title}")
 def render_average_page(data): # what the average page looks like 
     try:
         BRUH           = 20 # skip BRUH front / back pages (covers are diff sizes)
-        _test_page     = 255 - np.array(data[BRUH]).astype(np.uint8)
+        _test_page     = np.array(data[BRUH]).astype(np.uint8)
         for i in range(BRUH, len(data)-BRUH, 20):
-            _test_page = np.maximum(_test_page, 255 - np.array(data[i]).astype(np.uint8)) 
+            _test_page = np.minimum(_test_page, np.array(data[i]).astype(np.uint8)) 
         return (True, _test_page)
     except: # if the pages are all different sizes then we cant do it
         return (False, None)
@@ -39,7 +39,7 @@ success, avg_page = render_average_page(data)
 
 class Viewer():
     def refresh(self, e):
-        img                    = self.page.copy()
+        img                    = ImageOps.invert(self.page)
         width, height          = img.size
         # draw 
         x_left                 = self.vals[0].get()
